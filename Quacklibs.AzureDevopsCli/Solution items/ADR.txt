@@ -1,0 +1,24 @@
+﻿This project simplifies and automates serveral task that may be annoying or time consuming by hand. 
+
+# Features:
+
+# Authorization
+Authorization will be done by using PATs. The PAT will be stored locally. 
+
+# Workitems
+## Create work item | Task
+Use case: as a developer i want to be able to add work items | tasks through the CLI. This enables me to create 
+Goal: create a single Task | work item with a title in the active state. 
+
+# Release notes
+## Create release notes for a project. 
+use case: as a developer I want to be able to automatically create release notes for a project based on the commit messages & linked work items
+          as a app coordinator I want to be able to automatically create release notes for one or mulitple projects in a specific time span to report my PI results.
+          The results must be well formatted.  
+
+# Command and option Naming
+- The naming of the commands and options follow the POSIX standard
+- A command is a single argument and is a logical grouping of a set of functionality.
+- Sub commands specify an action that is done on that group. e.g. create | read | update | delete
+  - Each sub command has one of the above names as their primary name and one of the following short names c | r | u | d
+- Commands / subcommands are separated by a space. 

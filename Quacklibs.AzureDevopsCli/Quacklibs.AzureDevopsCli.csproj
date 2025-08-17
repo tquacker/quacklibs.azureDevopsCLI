@@ -1,0 +1,60 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net9.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<PackAsTool>true</PackAsTool>
+		<ToolCommandName>azdev</ToolCommandName>
+		<PackageOutputPath>./nupkg</PackageOutputPath>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<Authors>Thijs Kwakernaak</Authors>
+		<Company>Linq IT </Company>
+		<Description>Toolbox that simplifies various (azure devops) tasks</Description>
+		<PackageProjectUrl>Todo</PackageProjectUrl>
+		<RepositoryUrl>Todo</RepositoryUrl>
+		<PackageLicenseUrl>none</PackageLicenseUrl>
+		<RepositoryType></RepositoryType>
+	  <UserSecretsId>c09ef858-441a-4792-8789-5d8eecc2a7fd</UserSecretsId>
+  </PropertyGroup>
+
+	<ItemGroup>
+	  <Compile Remove="Commands\Release-Notes\**" />
+	  <EmbeddedResource Remove="Commands\Release-Notes\**" />
+	  <None Remove="Commands\Release-Notes\**" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="4.1.1" />
+		<PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.8" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.8" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="9.0.8" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.8" />
+		<PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.8" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.8" />
+		<PackageReference Include="Microsoft.Extensions.Options" Version="9.0.8" />
+		<PackageReference Include="Microsoft.TeamFoundationServer.Client" Version="19.225.1" />
+		<PackageReference Include="spectre.console" Version="0.50.0" />
+		<PackageReference Include="spectre.console.cli" Version="0.50.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<EditorConfigFiles Remove="C:\Users\Thijs\source\repos\Quacklibs.AzureDevopsCli\Quacklibs.AzureDevopsCli\.editorconfig" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="C:\Users\Thijs\source\repos\Quacklibs.AzureDevopsCli\Quacklibs.AzureDevopsCli\.editorconfig" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Update="appsettings.json">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Core\Behavior\" />
+	</ItemGroup>
+
+</Project>
