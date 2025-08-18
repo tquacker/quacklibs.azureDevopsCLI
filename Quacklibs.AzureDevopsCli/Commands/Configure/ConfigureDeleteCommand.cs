@@ -16,12 +16,17 @@ namespace Quacklibs.AzureDevopsCli.Commands.Configure
             _credentialStore = credentialStore;
         }
 
-        public override Task<int> OnExecuteAsync(CommandLineApplication app)
+        public override async Task<int> OnExecuteAsync(CommandLineApplication app)
         {
-            _settings.Delete();
-            _credentialStore.Delete();
+            var isOk = await AnsiConsole.ConfirmAsync("This will delete all configuration's. Do you wish to continue? ");
 
-            return Task.FromResult(ExitCodes.Ok);
+            if (!isOk)
+                return ExitCodes.Ok;
+
+            _settings.Delete();
+           //_credentialStore.Delete();
+
+            return ExitCodes.Ok;
         }
     }
 }

@@ -21,8 +21,9 @@ public class ColumnValue<T>
     public string ToString(T value)
     {
         var columnValue = _columnValueSelector(value) ?? string.Empty;
+        var safeColumnValue =  Markup.Escape(columnValue);
         //return $"[{_color.Value}]{columnValue}[/]";
-        return columnValue;
+        return safeColumnValue;
     }
 
 }

@@ -5,19 +5,28 @@ namespace Quacklibs.AzureDevopsCli
 {
     internal class AzureDevopsService
     {
-        private readonly VssConnection _connection;
-        private readonly WorkItemTrackingHttpClient _client;
+        private readonly AppOptionsService _appOptionsService;
+        private Lazy<VssConnection> _connection 
+            => new(() => CreatePATConnection(_appOptionsService.Defaults.OrganizationUrl, _appOptionsService.Defaults.PAT));
 
-        public AzureDevopsService(string organizationUrl, string pat)
+
+        public AzureDevopsService(AppOptionsService appOptionsService)
         {
-            _connection = CreatePATConnection(organizationUrl, pat);
-            //see https://github.com/MicrosoftDocs/vsts-rest-api-specs
-            _client = _connection.GetClient<WorkItemTrackingHttpClient>();
+            _appOptionsService = appOptionsService;
         }
 
-        public T GetClient<T>() where T : IVssHttpClient => _connection.GetClient<T>();
         
-        
+        public T GetClient<T>() where T : IVssHttpClient
+        {
+            if(string.IsNullOrEmpty(_appOptionsService.Defaults.OrganizationUrl))
+                AnsiConsole.Write($"Unable to create a connection, no {nameof(DefaultParameters.OrganizationUrl)} defined");
+            if(string.IsNullOrEmpty(_appOptionsService.Defaults.PAT))
+                AnsiConsole.Write($"Unable to Authorize to azure devops, no {nameof(DefaultParameters.PAT)} defined");
+            
+            return _connection.Value.GetClient<T>();
+        }
+
+
         /// <summary>
         /// Personal Access Token authentication (legacy - use modern auth instead)
         /// </summary>

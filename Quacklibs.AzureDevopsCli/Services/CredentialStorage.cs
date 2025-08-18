@@ -5,10 +5,10 @@ namespace Quacklibs.AzureDevopsCli.Services
 {
     public interface ICredentialStorage
     {
-        string GetCredential(string username);
-        void SetCredential(PersonalAccessToken pat);
+       // string GetCredential(string username);
+       // void SetCredential(PersonalAccessToken pat);
 
-        void Delete();
+       // void Delete();
     }
 
     internal class CredentialStorage : ICredentialStorage
