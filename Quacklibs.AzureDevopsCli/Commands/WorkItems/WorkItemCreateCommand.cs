@@ -85,7 +85,7 @@ namespace Quacklibs.AzureDevopsCli.Commands.WorkItems
                 });
             }
 
-            // Get the parent work item
+            // Get the parent work item. Adding this will ensure that the task get's shows on the current board
             var parentWorkItem = await witClient.GetWorkItemAsync(ParentId, new[] { "System.IterationPath" });
             var iterationPath = parentWorkItem.Fields["System.IterationPath"]?.ToString();
 
@@ -99,12 +99,13 @@ namespace Quacklibs.AzureDevopsCli.Commands.WorkItems
                                 Value = iterationPath
                             });
             }
+            
+            //todo: state
            
             // Create the task
             var createdWorkItem = await witClient.CreateWorkItemAsync(patchDocument, 
                                                                       _options.Project, 
-                                                                      type:WorkItemType.ToString(),
-                                                                      userState: State);
+                                                                      type:WorkItemType.ToString());
             
             AnsiConsole.WriteLine($"\n created {createdWorkItem.Id}. Type: {this.WorkItemType.ToString()}");
 

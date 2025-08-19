@@ -9,7 +9,7 @@ namespace Quacklibs.AzureDevopsCli.Commands.WorkItems;
 internal class WorkItemReadCommand : BaseCommand
 {
     [Option("-a|--assignedTo|--for")]
-    public string AssignedTo { get; set; } = "@me"; //options: @me, @all, @name
+    public string AssignedTo { get; set; }
 
     [Option("-s|--state")]
     public WorkItemState[] State { get; set; } = [WorkItemState.Active];
@@ -21,6 +21,8 @@ internal class WorkItemReadCommand : BaseCommand
     {
         _appOptions = appOptions;
         _azureDevops = azureDevops;
+
+        AssignedTo = appOptions.Defaults.UserEmail;
     }
 
     public override async Task<int> OnExecuteAsync(CommandLineApplication app)
