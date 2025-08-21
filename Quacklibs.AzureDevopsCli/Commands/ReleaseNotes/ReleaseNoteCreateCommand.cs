@@ -38,12 +38,8 @@ internal class ReleaseNoteCreateCommand : BaseCommand
         await GetClosedWorkItemsAsync(DateTime.Now.AddDays(-100));
 
         return ExitCodes.Ok;
-
     }
     
-    
-
-    [SuppressMessage("Minor Code Smell", "S1643:Strings should not be concatenated using '+' in a loop", Justification = "<Pending>")]
     private async Task GetClosedWorkItemsAsync(DateTime fromDate)
     {
         var fromDate2 = fromDate.ToString("dd-MM-yyyy").Encode();
@@ -60,7 +56,9 @@ internal class ReleaseNoteCreateCommand : BaseCommand
 
         var projects = await _service.GetClient<ProjectHttpClient>().GetProjects();
 
-        var builder = new TableBuilder<TeamProjectReference>().WithColumn("name", new(e => e.Name)).WithRows(projects);
+        var builder = new TableBuilder<TeamProjectReference>()
+                      .WithColumn("name", new(e => e.Name))
+                      .WithRows(projects);
         
         AnsiConsole.Write(builder.Build());
         
@@ -99,7 +97,6 @@ internal class ReleaseNoteCreateCommand : BaseCommand
             //Get first repo in project
             var releaseRepo = (await gitClient.GetRepositoriesAsync())[0];
 
-
             var searchCriteria = new GitPullRequestSearchCriteria
             {
                 TargetRefName = "refs/heads/main",
@@ -108,7 +105,6 @@ internal class ReleaseNoteCreateCommand : BaseCommand
                 QueryTimeRangeType = PullRequestTimeRangeType.Closed
                 //there is a min time and max time that can be included in the query to make it more performant,
                 //though it's not yet clear to me how that filters should be interpreted. So, it's a todo for now
-
             };
 
             //Grabs all completed PRs merged into master branch

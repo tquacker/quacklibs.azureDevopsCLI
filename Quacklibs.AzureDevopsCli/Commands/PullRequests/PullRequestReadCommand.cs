@@ -1,11 +1,14 @@
 using McMaster.Extensions.CommandLineUtils;
 using Microsoft.TeamFoundation.SourceControl.WebApi;
+using Microsoft.VisualStudio.Services.Common;
 using Microsoft.VisualStudio.Services.Identity;
 using Microsoft.VisualStudio.Services.Identity.Client;
 using Microsoft.VisualStudio.Services.Profile;
 using Microsoft.VisualStudio.Services.Profile.Client;
+using Microsoft.VisualStudio.Services.WebApi;
 using Quacklibs.AzureDevopsCli.Core.Behavior;
 using Quacklibs.AzureDevopsCli.Services;
+using System.Collections.Concurrent;
 
 namespace Quacklibs.AzureDevopsCli.Commands.PullRequests
 {
@@ -24,48 +27,47 @@ namespace Quacklibs.AzureDevopsCli.Commands.PullRequests
         public override async Task<int> OnExecuteAsync(CommandLineApplication app)
         {
             var gitClient = _service.GetClient<GitHttpClient>();
-            var profileClient = _service.GetClient<ProfileHttpClient>();
             var identityClient = _service.GetClient<IdentityHttpClient>();
-
             var userEmail = _optionsService.Defaults.GetSettingSafe(e => e.UserEmail);
+     
             var identitiesWithThisEmail = await identityClient.ReadIdentitiesAsync(IdentitySearchFilter.General, filterValue: _optionsService.Defaults.UserEmail);
 
             if (!EnsureOneIdentity(identitiesWithThisEmail, userEmail))
                 return ExitCodes.Error;
-                
+
             List<GitRepository> repositories = await gitClient.GetRepositoriesAsync();
 
-            var allRelevantPrs = new List<GitPullRequest>();
+            var allRelevantPrs = new ConcurrentBag<GitPullRequest>();
 
-            //TODO; 500 calls is a bit over ki
-            AnsiConsole.Write($"\n Querying {repositories.Count} repo's for pr's. this may take a while \n ");
-            foreach (GitRepository repo in repositories)
+            AnsiConsole.Write($"\n Polling {repositories.Count} repo's for pr's. this may take a while \n ");
+
+            await Parallel.ForEachAsync(repositories, new ParallelOptions() { MaxDegreeOfParallelism = 5 }, async (repo, cancellationToken) =>
             {
                 // Get PRs where current user is the creator
-                var createdPRs = await gitClient.GetPullRequestsAsync(repo.Id, 
-                    new GitPullRequestSearchCriteria
-                    {
-                        Status = PullRequestStatus.Active, 
-                        CreatorId = identitiesWithThisEmail.First().Id
-                    });
+                var createdPRs = await gitClient.GetPullRequestsAsync(repo.Id, new GitPullRequestSearchCriteria
+                {
+                    Status = PullRequestStatus.Active,
+                    CreatorId = identitiesWithThisEmail.First().Id
+                }, cancellationToken: cancellationToken);
 
                 // Get PRs where current user is a reviewer
                 var reviewerPRs = await gitClient.GetPullRequestsAsync(repo.Id, new GitPullRequestSearchCriteria
                 {
                     Status = PullRequestStatus.Active, 
                     ReviewerId = identitiesWithThisEmail.First().Id
-                });
+                }, cancellationToken: cancellationToken);
 
                 // Combine and deduplicate by PR ID
-                var combined = createdPRs.Concat(reviewerPRs)
-                                         .GroupBy(pr => pr.PullRequestId)
-                                         .Select(g => g.First())
-                                         .ToList();
+                var combinedCollection = createdPRs.Concat(reviewerPRs)
+                                                   .GroupBy(pr => pr.PullRequestId)
+                                                   .Select(g => g.First())
+                                                   .ToList();
 
-                allRelevantPrs.AddRange(combined);
-            }
-            
-            
+                foreach (var review in combinedCollection)
+                {
+                    allRelevantPrs.Add(review);
+                }
+            });
 
             var table = new TableBuilder<GitPullRequest>().WithColumn("Id", new(e => e.PullRequestId.ToString()))
                                                           .WithColumn("Title", new(e => e.Title))
