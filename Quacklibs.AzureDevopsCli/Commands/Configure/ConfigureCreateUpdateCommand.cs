@@ -52,6 +52,8 @@ namespace Quacklibs.AzureDevopsCli.Commands.Configure
                 // Console.WriteLine("Personal access token saved to secure storage");
             }
             
+            // var profile = await profileClient.GetProfileAsync(new ProfileQueryContext(AttributesScope.Core, CoreProfileAttributes.All));
+            //
             _settings.Save();
 
             Console.WriteLine("Current settings:");

@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.TeamFoundation.WorkItemTracking.Process.WebApi.Models.Process;
 using Microsoft.VisualStudio.Services.WebApi.Patch;
 using Microsoft.VisualStudio.Services.WebApi.Patch.Json;
+using Quacklibs.AzureDevopsCli.Services;
 using System.ComponentModel.DataAnnotations;
 using WorkItemType = Microsoft.TeamFoundation.WorkItemTracking.Process.WebApi.Models.Process.WorkItemType;
 
@@ -17,7 +18,7 @@ namespace Quacklibs.AzureDevopsCli.Commands.WorkItems
         [Option("-a|--assignedTo|--for")]
         public string AssignedTo { get; set; }
         
-        [Option("--title")]
+        [Option("-t|--title")]
         [Required]
         public string Title { get; set; }
 

@@ -24,6 +24,7 @@ public class TableBuilder<T>
 
         return this;
     }
+    
 
     public TableBuilder<T> WithRows(IEnumerable<T> rows)
     {

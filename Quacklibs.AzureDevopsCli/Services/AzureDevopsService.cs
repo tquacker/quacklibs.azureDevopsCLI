@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.Services.Common;
 using Microsoft.VisualStudio.Services.WebApi;
+using Quacklibs.AzureDevopsCli.Services;
 
 namespace Quacklibs.AzureDevopsCli
 {

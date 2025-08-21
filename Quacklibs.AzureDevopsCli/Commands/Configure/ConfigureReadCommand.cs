@@ -1,5 +1,6 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
 using Microsoft.TeamFoundation.Core.WebApi;
+using Quacklibs.AzureDevopsCli.Services;
 
 namespace Quacklibs.AzureDevopsCli.Commands.Configure
 {

@@ -1,8 +1,8 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Linq.Expressions;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
-
-namespace Quacklibs.AzureDevopsCli
+namespace Quacklibs.AzureDevopsCli.Services
 {
     internal record AppOptionKeyValue(string Name, object? Value);
 
@@ -32,7 +32,7 @@ namespace Quacklibs.AzureDevopsCli
         }
 
 
-        internal void Load()
+        void Load()
         {
             try
             {
@@ -100,17 +100,5 @@ namespace Quacklibs.AzureDevopsCli
 
             File.WriteAllText(configurationFile, output);
         }
-    }
-
-
-    public class DefaultParameters
-    {
-        public string OrganizationUrl { get; set; }
-
-        public string Project { get; set; } = "MVT - ValidatieTeruggaafBTW - Douane";
-        
-        public string PAT { get; set; }
-        
-        public string UserEmail { get; set; }
-    }
+  }
 }
