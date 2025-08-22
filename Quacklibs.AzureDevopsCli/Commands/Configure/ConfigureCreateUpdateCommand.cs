@@ -17,7 +17,7 @@ namespace Quacklibs.AzureDevopsCli.Commands.Configure
         public string? Pat { get; set; }
         
         [Option("--user|--email|--useremail", Description= "Set the user")]
-        public string UserEmail { get; set; }
+        public string UserEmail { get; set; } 
 
         private readonly AppOptionsService _settings;
         private readonly ICredentialStorage _credentialStore;

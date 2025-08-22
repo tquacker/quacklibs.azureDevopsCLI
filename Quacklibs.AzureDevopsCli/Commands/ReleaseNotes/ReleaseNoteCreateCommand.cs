@@ -34,7 +34,7 @@ internal class ReleaseNoteCreateCommand : BaseCommand
 
     public override async Task<int> OnExecuteAsync(CommandLineApplication app)
     {
-        await GetMergedPRs(DateTime.Now.AddDays(-100));
+        await GetMergedPRs(DateTime.Now.AddDays(-500));
         await GetClosedWorkItemsAsync(DateTime.Now.AddDays(-100));
 
         return ExitCodes.Ok;
@@ -95,23 +95,26 @@ internal class ReleaseNoteCreateCommand : BaseCommand
         using (gitClient)
         {
             //Get first repo in project
-            var releaseRepo = (await gitClient.GetRepositoriesAsync())[0];
-
+            var releaseRepo = (await gitClient.GetRepositoriesAsync(project: Project));
+           
+            
+            
             var searchCriteria = new GitPullRequestSearchCriteria
             {
                 TargetRefName = "refs/heads/main",
                 Status = PullRequestStatus.Completed,
                 MaxTime = releaseSpan,
-                QueryTimeRangeType = PullRequestTimeRangeType.Closed
+                QueryTimeRangeType = PullRequestTimeRangeType.Closed,
                 //there is a min time and max time that can be included in the query to make it more performant,
                 //though it's not yet clear to me how that filters should be interpreted. So, it's a todo for now
             };
 
+            
             //Grabs all completed PRs merged into master branch
-            var prs = await (gitClient.GetPullRequestsAsync(releaseRepo.Id, searchCriteria)) ?? [];
+            var prs = await (gitClient.GetPullRequestsAsync(releaseRepo[0].Id, searchCriteria)) ?? [];
 
             var closedPrsInRange = prs.Where(e => e.ClosedDate >= releaseSpan)
-                                       .Select((pull, index) => $"\n {index + 1}. #{pull.PullRequestId} - {pull.Title}");
+                                      .Select((pull, index) => $"\n {index + 1}. #{pull.PullRequestId} - {pull.Title}");
 
             foreach (var item in closedPrsInRange)
             {

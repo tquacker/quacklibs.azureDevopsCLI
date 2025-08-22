@@ -34,10 +34,9 @@ namespace Quacklibs.AzureDevopsCli
             app.Conventions
                 .UseDefaultConventions()
                 .UseConstructorInjection(services);
-
+        
             return app.Execute(args);
         }
-
 
         public int OnExecute(CommandLineApplication app, IConsole console)
         {
@@ -47,13 +46,13 @@ namespace Quacklibs.AzureDevopsCli
             return 1;
         }
 
-
         private static void WriteWelcomeMessage()
         {
             var versionString = Assembly.GetEntryAssembly()?
                                .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
                                .InformationalVersion
                                .ToString();
+            
             Console.WriteLine($"Starting auzure devops cli, v{versionString}");
         }
     }

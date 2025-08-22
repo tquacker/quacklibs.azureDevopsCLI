@@ -10,7 +10,7 @@ namespace Quacklibs.AzureDevopsCli.Commands.WorkItems;
 internal class WorkItemReadCommand : BaseCommand
 {
     [Option("-a|--assignedTo|--for")]
-    public string AssignedTo { get; set; }
+    public string AssignedTo { get; set; } = "@me";
 
     [Option("-s|--state")]
     public WorkItemState[] State { get; set; } = [WorkItemState.Active];
@@ -61,8 +61,6 @@ internal class WorkItemReadCommand : BaseCommand
 
         var wiql = new Wiql() { Query = cleanedQuery };
 
-        Console.WriteLine(wiql.Query);
-
         var result = await _azureDevops.GetClient<WorkItemTrackingHttpClient>().QueryByWiqlAsync(wiql);
 
         var requestedFields = new[] { "System.Id", "System.WorkItemType", "System.State", "System.Title", "System.TeamProject" };
@@ -70,17 +68,13 @@ internal class WorkItemReadCommand : BaseCommand
         var workItems = await _azureDevops.GetClient<WorkItemTrackingHttpClient>()
                                           .GetWorkItemsAsync(ids, fields: requestedFields);
 
-        //Console.WriteLine(result?.WorkItemRelations?.Count());
-        // Console.WriteLine(result?.WorkItems?.Count());
-        Console.WriteLine(result?.Columns?.Count());
-
         var table = new TableBuilder<WorkItem>()
                     .WithColumn("id", new(e => e.Id.ToString()))
                     .WithColumn("title", new(e => e.Fields[requestedFields[3]].ToString()))
                     .WithColumn("work item type", new(e => e.Fields[requestedFields[1]].ToString()))
                     .WithColumn("state", new(e => e.Fields[requestedFields[2]].ToString()))
                     .WithColumn("teamProject", new(e => e.Fields[requestedFields[4]].ToString()))
-                    .WithColumn("link", new(e => $"{new WorkItemLinkType(_appOptions.Defaults.OrganizationUrl, e.Fields[requestedFields[4]]?.ToString() ?? "", e.Id).ToWorkItemUrl()}"))
+                    .WithColumn("link", new(e => $"{new WorkItemLinkType(_appOptions.Defaults.OrganizationUrl, e.Fields[requestedFields[4]]?.ToString() ?? "", e.Id).ToWorkItemUrl()}", true))
                     .WithRows(workItems)
                     .Build();
 
