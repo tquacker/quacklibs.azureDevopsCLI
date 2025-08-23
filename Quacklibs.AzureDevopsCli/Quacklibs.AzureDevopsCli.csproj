@@ -6,9 +6,9 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<PackAsTool>true</PackAsTool>
-		<ToolCommandName>azdev</ToolCommandName>
+		<ToolCommandName>azdo</ToolCommandName>
 		<PackageOutputPath>./nupkg</PackageOutputPath>
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+       <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<Authors>Thijs Kwakernaak</Authors>
 		<Company>Linq IT </Company>
 		<Description>Toolbox that simplifies various (azure devops) tasks</Description>
@@ -51,10 +51,6 @@
 		<None Update="appsettings.json">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="Core\Behavior\" />
 	</ItemGroup>
 
 </Project>

@@ -15,6 +15,9 @@ namespace Quacklibs.AzureDevopsCli.Commands.Configure
 
         [Option("--pat", Description= "Set the Personal access token that is used to connect to azure devops")]
         public string? Pat { get; set; }
+        
+        [Option("--user|--email|--useremail", Description= "Set the user")]
+        public string UserEmail { get; set; } 
 
         private readonly AppOptionsService _settings;
         private readonly ICredentialStorage _credentialStore;
@@ -32,18 +35,26 @@ namespace Quacklibs.AzureDevopsCli.Commands.Configure
             if (!string.IsNullOrEmpty(Project))
             {
                 _settings.Defaults.Project = Project;
-                _settings.Save();
             }
             if (!string.IsNullOrEmpty(OrganizationUrl))
             {
                 _settings.Defaults.OrganizationUrl = OrganizationUrl;
-                _settings.Save();
+            }
+            if (!string.IsNullOrEmpty(UserEmail))
+            {
+                _settings.Defaults.UserEmail = UserEmail;
             }
             if (!string.IsNullOrEmpty(Pat))
             {
-                _credentialStore.SetCredential(new PersonalAccessToken(Pat));
-                Console.WriteLine("Personal access token saved to secure storage");
+                _settings.Defaults.PAT = Pat;
+                //TODO
+                // _credentialStore.set(new PersonalAccessToken(Pat));
+                // Console.WriteLine("Personal access token saved to secure storage");
             }
+            
+            // var profile = await profileClient.GetProfileAsync(new ProfileQueryContext(AttributesScope.Core, CoreProfileAttributes.All));
+            //
+            _settings.Save();
 
             Console.WriteLine("Current settings:");
             _readCommand.OnExecuteAsync(app);

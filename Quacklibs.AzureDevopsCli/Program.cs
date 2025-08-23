@@ -1,6 +1,7 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
 using Microsoft.Extensions.DependencyInjection;
 using Quacklibs.AzureDevopsCli.Commands.Configure;
+using Quacklibs.AzureDevopsCli.Commands.PullRequests;
 using Quacklibs.AzureDevopsCli.Commands.ReleaseNotes;
 using Quacklibs.AzureDevopsCli.Commands.WorkItems;
 using Quacklibs.AzureDevopsCli.Services;
@@ -13,6 +14,7 @@ namespace Quacklibs.AzureDevopsCli
     [Subcommand(typeof(ConfigureCommand))]
     [Subcommand(typeof(WorkItemCommand))]
     [Subcommand(typeof(ReleaseNoteCommand))]
+    [Subcommand(typeof(PullRequestCommand))]
     [HelpOption]
     internal class Program
     {
@@ -32,15 +34,9 @@ namespace Quacklibs.AzureDevopsCli
             app.Conventions
                 .UseDefaultConventions()
                 .UseConstructorInjection(services);
-
-            var configuration = new ConfigurationBuilder()
-                .SetBasePath(AppContext.BaseDirectory)
-                .AddJsonFile("appsettings.json")
-                .Build();
-
+        
             return app.Execute(args);
         }
-
 
         public int OnExecute(CommandLineApplication app, IConsole console)
         {
@@ -50,13 +46,13 @@ namespace Quacklibs.AzureDevopsCli
             return 1;
         }
 
-
         private static void WriteWelcomeMessage()
         {
             var versionString = Assembly.GetEntryAssembly()?
                                .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
                                .InformationalVersion
                                .ToString();
+            
             Console.WriteLine($"Starting auzure devops cli, v{versionString}");
         }
     }
