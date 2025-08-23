@@ -69,14 +69,16 @@ namespace Quacklibs.AzureDevopsCli.Commands.PullRequests
                 }
             });
 
-            var table = new TableBuilder<GitPullRequest>().WithColumn("Id", new(e => e.PullRequestId.ToString()))
-                                                          .WithColumn("Title", new(e => e.Title))
-                                                          .WithColumn("Date", new(e => e.CreationDate.ToString("dd-MM-yyyy")))
-                                                          .WithColumn("Repo", new(e => e.Repository.Name))
-                                                          .WithColumn("Submitter", new(e => e.CreatedBy.DisplayName))
-                                                          .WithColumn("IsReviewed", new(e => e.Reviewers.Any(rv => rv.Vote >= 5) ? "true" : "false"))
-                                                          .WithRows(allRelevantPrs)
-                                                          .Build();
+            var table = TableBuilder<GitPullRequest>
+                        .Create()
+                        .WithColumn("Id", new(e => e.PullRequestId.ToString()))
+                        .WithColumn("Title", new(e => e.Title))
+                        .WithColumn("Date", new(e => e.CreationDate.ToString("dd-MM-yyyy")))
+                        .WithColumn("Repo", new(e => e.Repository.Name))
+                        .WithColumn("Submitter", new(e => e.CreatedBy.DisplayName))
+                        .WithColumn("IsReviewed", new(e => e.Reviewers.Any(rv => rv.Vote >= 5) ? "true" : "false"))
+                        .WithRows(allRelevantPrs)
+                        .Build();
 
             AnsiConsole.Write(table);
 

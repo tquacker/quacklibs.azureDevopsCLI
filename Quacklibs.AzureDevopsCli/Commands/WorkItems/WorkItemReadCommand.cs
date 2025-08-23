@@ -68,7 +68,8 @@ internal class WorkItemReadCommand : BaseCommand
         var workItems = await _azureDevops.GetClient<WorkItemTrackingHttpClient>()
                                           .GetWorkItemsAsync(ids, fields: requestedFields);
 
-        var table = new TableBuilder<WorkItem>()
+        var table = TableBuilder<WorkItem>
+                    .Create()
                     .WithColumn("id", new(e => e.Id.ToString()))
                     .WithColumn("title", new(e => e.Fields[requestedFields[3]].ToString()))
                     .WithColumn("work item type", new(e => e.Fields[requestedFields[1]].ToString()))

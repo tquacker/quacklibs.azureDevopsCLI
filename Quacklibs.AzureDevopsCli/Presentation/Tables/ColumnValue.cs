@@ -19,7 +19,6 @@ public class ColumnValue<T>
         _color = color;
     }
 
-
     public string ToString(T value)
     {
         var columnValue = _columnValueSelector(value) ?? string.Empty;
