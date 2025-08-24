@@ -29,6 +29,7 @@ namespace Quacklibs.AzureDevopsCli.Commands.Configure
 
                 var table = TableBuilder<AppOptionKeyValue>
                             .Create()
+                            .WithTitle("Configuration")
                             .WithColumn(name: "Name", valueSelector: new(e => e.Name, TableColor.Skyblue))
                             .WithColumn(name: "Value", valueSelector: new(e => e.Value?.ToString()))
                             .WithRows(result)
@@ -48,6 +49,7 @@ namespace Quacklibs.AzureDevopsCli.Commands.Configure
 
             var projectsTable = TableBuilder<TeamProjectReference>
                                 .Create()
+                                .WithTitle("Projects")
                                 .WithColumn("id", new(e => e.Id.ToString()))
                                 .WithColumn("url", new(e => e.Url))
                                 .WithColumn("name", new(e => e.Name))

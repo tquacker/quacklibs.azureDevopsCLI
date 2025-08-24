@@ -1,11 +1,7 @@
 using McMaster.Extensions.CommandLineUtils;
 using Microsoft.TeamFoundation.SourceControl.WebApi;
-using Microsoft.VisualStudio.Services.Common;
 using Microsoft.VisualStudio.Services.Identity;
 using Microsoft.VisualStudio.Services.Identity.Client;
-using Microsoft.VisualStudio.Services.Profile;
-using Microsoft.VisualStudio.Services.Profile.Client;
-using Microsoft.VisualStudio.Services.WebApi;
 using Quacklibs.AzureDevopsCli.Core.Behavior;
 using Quacklibs.AzureDevopsCli.Services;
 using System.Collections.Concurrent;
@@ -58,10 +54,7 @@ namespace Quacklibs.AzureDevopsCli.Commands.PullRequests
                 }, cancellationToken: cancellationToken);
 
                 // Combine and deduplicate by PR ID
-                var combinedCollection = createdPRs.Concat(reviewerPRs)
-                                                   .GroupBy(pr => pr.PullRequestId)
-                                                   .Select(g => g.First())
-                                                   .ToList();
+                var combinedCollection = createdPRs.DistinctBy(e => e.PullRequestId);
 
                 foreach (var review in combinedCollection)
                 {
@@ -77,6 +70,7 @@ namespace Quacklibs.AzureDevopsCli.Commands.PullRequests
                         .WithColumn("Repo", new(e => e.Repository.Name))
                         .WithColumn("Submitter", new(e => e.CreatedBy.DisplayName))
                         .WithColumn("IsReviewed", new(e => e.Reviewers.Any(rv => rv.Vote >= 5) ? "true" : "false"))
+                        .WithColumn("Link", new(e => e.RemoteUrl.ToString().AsUrlMarkup()))
                         .WithRows(allRelevantPrs)
                         .Build();
 

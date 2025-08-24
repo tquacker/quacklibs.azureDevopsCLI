@@ -70,12 +70,13 @@ internal class WorkItemReadCommand : BaseCommand
 
         var table = TableBuilder<WorkItem>
                     .Create()
+                    .WithTitle("WorkItems")
                     .WithColumn("id", new(e => e.Id.ToString()))
                     .WithColumn("title", new(e => e.Fields[requestedFields[3]].ToString()))
                     .WithColumn("work item type", new(e => e.Fields[requestedFields[1]].ToString()))
                     .WithColumn("state", new(e => e.Fields[requestedFields[2]].ToString()))
                     .WithColumn("teamProject", new(e => e.Fields[requestedFields[4]].ToString()))
-                    .WithColumn("link", new(e => $"{new WorkItemLinkType(_appOptions.Defaults.OrganizationUrl, e.Fields[requestedFields[4]]?.ToString() ?? "", e.Id).ToWorkItemUrl()}", true))
+                    .WithColumn("link", new(e => $"{new WorkItemLinkType(_appOptions.Defaults.OrganizationUrl, e.Fields[requestedFields[4]]?.ToString() ?? "", e.Id).ToWorkItemUrl()}"))
                     .WithRows(workItems)
                     .Build();
 

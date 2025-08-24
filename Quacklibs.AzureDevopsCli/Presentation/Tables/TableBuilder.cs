@@ -4,11 +4,13 @@
 /// Easily create tables. This objects ensures that all our tables will look the same. 
 /// </summary>
 /// <typeparam name="T"></typeparam>
-public class TableBuilder<T> : ISubColumnBuilder<T>, ITableColumnBuilder<T>
+public class TableBuilder<T> : ISubColumnBuilder<T>, ITableColumnBuilder<T>, ITableBuilderStarter<T>
 {
     private readonly Table _table;
     private readonly List<T> _rows = [];
     private readonly List<ColumnValue<T>> _columnValues = [];
+
+    private string _title { get; set; }
 
     private TableBuilder()
     {
@@ -17,7 +19,13 @@ public class TableBuilder<T> : ISubColumnBuilder<T>, ITableColumnBuilder<T>
                  .BorderColor(Color.Grey);
     }
 
-    public static ITableColumnBuilder<T> Create() => new TableBuilder<T>();
+    public static ITableBuilderStarter<T> Create() => new TableBuilder<T>();
+
+    public ITableColumnBuilder<T> WithTitle(string Title)
+    {
+        _title = Title;
+        return this;
+    }
 
     public ISubColumnBuilder<T> WithColumn(string name, ColumnValue<T> valueSelector)
     {
@@ -50,6 +58,8 @@ public class TableBuilder<T> : ISubColumnBuilder<T>, ITableColumnBuilder<T>
 
     public Table Build()
     {
+
+        _table.Title = TableTitle;
         foreach (var row in _rows)
         {
             var columnValues = _columnValues.Select(columnValues => columnValues.ToString(row))
@@ -59,7 +69,15 @@ public class TableBuilder<T> : ISubColumnBuilder<T>, ITableColumnBuilder<T>
 
         return _table;
     }
+
+    
 }
+
+public interface ITableBuilderStarter<T>
+{
+    public ITableColumnBuilder<T> WithTitle(string Title);
+}
+
 
 public interface ITableColumnBuilder<T>
 {

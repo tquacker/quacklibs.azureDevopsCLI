@@ -4,7 +4,7 @@ namespace Quacklibs.AzureDevopsCli.Core.Behavior
 {
     public static class DefaultParmeters
     {
-        public static TProp GetSettingSafe<T, TProp>(this T defaultValue, Expression<Func<T, TProp>> propertySelector)
+        public static TProp GetSettingSafe<T, TProp>(this T target, Expression<Func<T, TProp>> propertySelector)
         {
             string selectedPropertyName = "";
 
@@ -17,7 +17,7 @@ namespace Quacklibs.AzureDevopsCli.Core.Behavior
                 selectedPropertyName = memberExpr.Member.Name;
             }
 
-            var result = propertySelector.Compile().Invoke(defaultValue);
+            var result = propertySelector.Compile().Invoke(target);
             
             if (result is null || result is "")
             {
