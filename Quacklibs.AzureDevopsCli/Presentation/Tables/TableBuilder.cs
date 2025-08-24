@@ -59,7 +59,7 @@ public class TableBuilder<T> : ISubColumnBuilder<T>, ITableColumnBuilder<T>, ITa
     public Table Build()
     {
 
-        _table.Title = new TableTitle(_title, new Style(decoration: Decoration.Bold));
+        _table.Title = new TableTitle(_title, new Style(decoration: Decoration.Bold | Decoration.Underline));
 
         foreach (var row in _rows)
         {

@@ -18,15 +18,19 @@ namespace Quacklibs.AzureDevopsCli.Commands.SprintPlanning
 
         public AzureDevopsService _service { get; }
 
-        [Option("--team|--project|--for")]
+        [Option("--team|--project")]
         [Required]
         string Project { get; set; }
 
+        [Option("--for")]
+        string AssignedTo { get; set; } = "@all";
 
         public SprintPlanningUpdateCommand(AzureDevopsService service, AppOptionsService options)
         {
             _service = service;
             this.options = options;
+
+            Project = options.Defaults.Project;
         }
 
         public override async Task<int> OnExecuteAsync(CommandLineApplication app)
@@ -51,15 +55,13 @@ namespace Quacklibs.AzureDevopsCli.Commands.SprintPlanning
             var pastIterations = iterations.Where(e => e.Attributes.TimeFrame == TimeFrame.Past || e.Attributes.TimeFrame == TimeFrame.Current);
             var futureIterations = iterations.Where(e => e.Attributes.TimeFrame == TimeFrame.Current || e.Attributes.TimeFrame == TimeFrame.Future);
 
-            Func<TeamSettingsIteration, string> displayString = e => $"{e.Name}. Ends: {e.Attributes.FinishDate.Value.ToString(Defaults.DateFormat)}";
-
+            Func<TeamSettingsIteration, string> displayString = e => $"{e.Name}. {e.Path}, {e.Attributes.StartDate.Value.ToString(Defaults.DateFormat)} - {e.Attributes.FinishDate.Value.ToString(Defaults.DateFormat)}";
 
             var fromPrompt = new SelectionPrompt<TeamSettingsIteration>()
            .Title("Select [green]From[/]:")
            .PageSize(10)
            .AddChoices(pastIterations.ToArray())
            .UseConverter(displayString);
-
 
             var toPrompt = new SelectionPrompt<TeamSettingsIteration>()
                 .Title("Select [blue]To[/]:")
@@ -71,6 +73,8 @@ namespace Quacklibs.AzureDevopsCli.Commands.SprintPlanning
             var fromIteration = AnsiConsole.Prompt(fromPrompt);
             var toIteration = AnsiConsole.Prompt(toPrompt);
 
+            var assignedToWiql = new AssignedUserWiqlQueryPart(options.Defaults.UserEmail).Get(this.AssignedTo);
+
             var wiql = new Wiql()
             {
                 Query = $@"
@@ -78,6 +82,7 @@ namespace Quacklibs.AzureDevopsCli.Commands.SprintPlanning
         FROM WorkItems
         WHERE [System.IterationPath] = '{fromIteration.Path}'
         AND [System.State] IN ('New', 'Active')
+        {assignedToWiql}
         ORDER BY [System.Id]"
             };
 
@@ -87,21 +92,31 @@ namespace Quacklibs.AzureDevopsCli.Commands.SprintPlanning
 
             var workitemIdsInCurrentIteration = workItemsInCurrentIteration.WorkItems.Select(e => e.Id);
 
-            var workItemsToMove = await workItemClient.GetWorkItemsAsync(workitemIdsInCurrentIteration, expand: WorkItemExpand.Fields);
+            if (!workitemIdsInCurrentIteration.Any())
+            {
+                Console.WriteLine("No workitems found");
+                return ExitCodes.Ok;
+            }
 
-
+            string[] fields = [AzureDevopsFields.WorkItemState, AzureDevopsFields.WorkItemType, AzureDevopsFields.WorkItemAssignedTo, AzureDevopsFields.WorkItemTitle];
+            var workItemsToMove = await workItemClient.GetWorkItemsAsync(workitemIdsInCurrentIteration, fields); 
+           
             var table = TableBuilder<WorkItem>
                 .Create()
                 .WithTitle("Workitems that will be moved")
                 .WithColumn("Id", new ColumnValue<WorkItem>(e => e.Id.ToString()))
                 .WithColumn("Title", new(e => e.Fields[AzureDevopsFields.WorkItemTitle].ToString()))
+                .WithColumn("Type", new(e => e.Fields[AzureDevopsFields.WorkItemType].ToString()))
+                .WithColumn("AssignedTo", new(e => e.Fields.TryGetFieldValue(AzureDevopsFields.WorkItemAssignedTo, "n/a").ToString()))
+                .WithColumn("State", new(e => e.Fields[AzureDevopsFields.WorkItemState].ToString()))
                 .WithColumn("url", new(e => e.Url.AsUrlMarkup("link")))
                 .WithRows(workItemsToMove)
                 .Build();
 
             AnsiConsole.Write(table);
 
-            bool isConfirmed = AnsiConsole.Confirm($"Do you wish to move these workitems to iteration {toIteration.Name}");
+            bool isConfirmed = AnsiConsole.Confirm($"Move workitems from {fromIteration.Name} ({fromIteration.Attributes.TimeFrame}) " +
+                                                   $"to iteration {toIteration.Name} ({toIteration.Attributes.TimeFrame})");
 
             if (!isConfirmed)
                 return ExitCodes.Ok;

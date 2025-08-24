@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Quacklibs.AzureDevopsCli.Commands.Configure;
 using Quacklibs.AzureDevopsCli.Commands.PullRequests;
 using Quacklibs.AzureDevopsCli.Commands.ReleaseNotes;
+using Quacklibs.AzureDevopsCli.Commands.SprintPlanning;
 using Quacklibs.AzureDevopsCli.Commands.WorkItems;
 using Quacklibs.AzureDevopsCli.Services;
 using System.Reflection;
@@ -15,6 +16,7 @@ namespace Quacklibs.AzureDevopsCli
     [Subcommand(typeof(WorkItemCommand))]
     [Subcommand(typeof(ReleaseNoteCommand))]
     [Subcommand(typeof(PullRequestCommand))]
+    [Subcommand(typeof(SprintPlanningCommand))]
     [HelpOption]
     internal class Program
     {

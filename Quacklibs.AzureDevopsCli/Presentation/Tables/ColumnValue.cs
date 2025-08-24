@@ -22,7 +22,7 @@ public class ColumnValue<T>
     {
         var columnValue = _columnValueSelector(value) ?? string.Empty;
         bool isMarkup = columnValue.EndsWith("/]");
-        var safeColumnValue =  !_isMarkup ? Markup.Escape(columnValue) : columnValue;
+        var safeColumnValue =  isMarkup ? columnValue : Markup.Escape(columnValue);
         
         return safeColumnValue;
     }
