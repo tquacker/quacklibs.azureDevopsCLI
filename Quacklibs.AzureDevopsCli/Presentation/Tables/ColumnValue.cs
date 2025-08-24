@@ -6,15 +6,14 @@ public class ColumnValue<T>
     private readonly TableColor _color;
     private readonly bool _isMarkup;
 
-    public ColumnValue(Func<T, string?> columnValueSelector, bool isMarkup = false)
+    public ColumnValue(Func<T, string?> columnValueSelector)
     {
         _columnValueSelector = columnValueSelector;
         //TODO: this default assumes that the user has an black console. 
         _color = TableColor.White;
-        _isMarkup = isMarkup;
     }
 
-    public ColumnValue(Func<T, string?> columnValueSelector, TableColor color, bool isMarkup = false) : this(columnValueSelector, isMarkup)
+    public ColumnValue(Func<T, string?> columnValueSelector, TableColor color) : this(columnValueSelector)
     {
         _color = color;
     }
@@ -22,8 +21,9 @@ public class ColumnValue<T>
     public string ToString(T value)
     {
         var columnValue = _columnValueSelector(value) ?? string.Empty;
+        bool isMarkup = columnValue.EndsWith("/]");
         var safeColumnValue =  !_isMarkup ? Markup.Escape(columnValue) : columnValue;
-        //return $"[{_color.Value}]{columnValue}[/]";
+        
         return safeColumnValue;
     }
 

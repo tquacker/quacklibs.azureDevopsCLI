@@ -1,4 +1,6 @@
-﻿namespace Quacklibs.AzureDevopsCli.Core.Types;
+﻿using Spectre.Console.Rendering;
+
+namespace Quacklibs.AzureDevopsCli.Core.Types;
 
 public record ReleaseNoteType(string Title)
 {
@@ -6,6 +8,13 @@ public record ReleaseNoteType(string Title)
 
     public void Add(ReleasedFeature feature)
     {
+        var featureAlreadyExists = Features.FirstOrDefault(e => e.Id == feature.Id);
+        if (featureAlreadyExists != null)
+        {
+            feature.AddWorkItems([.. feature.WorkItems]);
+        }
+
+
         Features.Add(feature);
     }
 }
@@ -20,6 +29,11 @@ public record ReleasedFeature(string Status,
 
     public List<MergedPullRequest> PullRequest { get; set; }
     public List<ReleasedWorkItem> WorkItemPart { get; set; }
+
+    public void AddWorkItems(params ReleasedWorkItem[] workItems)
+    {
+        WorkItemPart.AddRange(WorkItems);
+    }
 
 
 

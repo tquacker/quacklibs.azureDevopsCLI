@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace Quacklibs.AzureDevopsCli.Commands.SprintPlanning
 {
     [Command("planning", Description = "Bulk operations on boards")]
-    [Subcommand(typeof(ReleaseNoteCreateCommand))]
+    [Subcommand(typeof(SprintPlanningUpdateCommand))]
     internal class SprintPlanningCommand : BaseCommand
     {
         public SprintPlanningCommand()

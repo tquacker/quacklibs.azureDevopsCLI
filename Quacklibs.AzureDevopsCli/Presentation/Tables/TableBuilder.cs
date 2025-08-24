@@ -59,7 +59,8 @@ public class TableBuilder<T> : ISubColumnBuilder<T>, ITableColumnBuilder<T>, ITa
     public Table Build()
     {
 
-        _table.Title = TableTitle;
+        _table.Title = new TableTitle(_title, new Style(decoration: Decoration.Bold));
+
         foreach (var row in _rows)
         {
             var columnValues = _columnValues.Select(columnValues => columnValues.ToString(row))

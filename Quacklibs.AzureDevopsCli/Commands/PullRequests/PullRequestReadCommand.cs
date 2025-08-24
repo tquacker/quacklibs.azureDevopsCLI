@@ -64,6 +64,7 @@ namespace Quacklibs.AzureDevopsCli.Commands.PullRequests
 
             var table = TableBuilder<GitPullRequest>
                         .Create()
+                        .WithTitle("Pull requests")
                         .WithColumn("Id", new(e => e.PullRequestId.ToString()))
                         .WithColumn("Title", new(e => e.Title))
                         .WithColumn("Date", new(e => e.CreationDate.ToString("dd-MM-yyyy")))
