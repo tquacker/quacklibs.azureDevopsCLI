@@ -1,4 +1,5 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
+using Quacklibs.AzureDevopsCli.Commands.PullRequests;
 using Quacklibs.AzureDevopsCli.Services;
 
 
@@ -18,35 +19,46 @@ namespace Quacklibs.AzureDevopsCli.Commands.Configure
         
         [Option("--user|--email|--useremail", Description= "Set the user")]
         public string UserEmail { get; set; } 
+        
+        [Option("--env|--environment", Description= "create a new environment")]
+        public string Environment { get; set; }
 
-        private readonly AppOptionsService _settings;
         private readonly ICredentialStorage _credentialStore;
         private readonly ConfigureReadCommand _readCommand;
 
-        public ConfigureCreateUpdateCommand(AppOptionsService settings, ICredentialStorage credentialStore, ConfigureReadCommand readCommand)
+        public ConfigureCreateUpdateCommand(ICredentialStorage credentialStore, ConfigureReadCommand readCommand)
         {
-            _settings = settings ?? throw new ArgumentNullException(nameof(settings));
             _credentialStore = credentialStore;
             _readCommand = readCommand;
         }
 
-        public override Task<int> OnExecuteAsync(CommandLineApplication app)
+        public override async Task<int> OnExecuteAsync(CommandLineApplication app)
         {
+            base.OnExecuteAsync(app);
+
+            if (!string.IsNullOrEmpty(Environment))
+            {
+                if (base.Settings.TryAddEnvironment(Environment) == false)
+                    return ExitCodes.Error;
+            }
+            
+            //TODO: this should be a choice from the available projects | a walkthrough
             if (!string.IsNullOrEmpty(Project))
             {
-                _settings.Defaults.Project = Project;
+                EnvironmentSettings.Project = Project;
             }
             if (!string.IsNullOrEmpty(OrganizationUrl))
             {
-                _settings.Defaults.OrganizationUrl = OrganizationUrl;
+                EnvironmentSettings.OrganizationUrl = OrganizationUrl;
             }
+            //TODO: this should be retrieved from the PAT
             if (!string.IsNullOrEmpty(UserEmail))
             {
-                _settings.Defaults.UserEmail = UserEmail;
+                EnvironmentSettings.UserEmail = UserEmail;
             }
             if (!string.IsNullOrEmpty(Pat))
             {
-                _settings.Defaults.PAT = Pat;
+                EnvironmentSettings.PAT = Pat;
                 //TODO
                 // _credentialStore.set(new PersonalAccessToken(Pat));
                 // Console.WriteLine("Personal access token saved to secure storage");
@@ -54,12 +66,12 @@ namespace Quacklibs.AzureDevopsCli.Commands.Configure
             
             // var profile = await profileClient.GetProfileAsync(new ProfileQueryContext(AttributesScope.Core, CoreProfileAttributes.All));
             //
-            _settings.Save();
+            base.SettingsService.Save(base.Settings);
 
             Console.WriteLine("Current settings:");
             _readCommand.OnExecuteAsync(app);
 
-            return Task.FromResult(ExitCodes.Ok);
+            return ExitCodes.Ok;
         }
     }
 }

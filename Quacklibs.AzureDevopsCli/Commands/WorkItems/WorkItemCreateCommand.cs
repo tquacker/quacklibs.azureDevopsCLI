@@ -13,7 +13,7 @@ namespace Quacklibs.AzureDevopsCli.Commands.WorkItems
     internal class WorkItemCreateCommand : BaseCommand
     {
         private readonly AzureDevopsService _service;
-        private readonly DefaultParameters _options;
+        private readonly EnvironmentConfiguration _options;
 
         [Option("-a|--assignedTo|--for")]
         public string AssignedTo { get; set; }
@@ -35,11 +35,10 @@ namespace Quacklibs.AzureDevopsCli.Commands.WorkItems
         [Option("--type")]
         public WorkItemKind WorkItemType { get; set; } = WorkItemKind.Task;
  
-        public WorkItemCreateCommand(AzureDevopsService service, AppOptionsService options)
+        public WorkItemCreateCommand(AzureDevopsService service, SettingsService options)
         {
             _service = service;
-            _options = options.Defaults;
-            AssignedTo = options.Defaults.UserEmail;
+            AssignedTo = base.EnvironmentSettings.UserEmail;
         }
         
         public override async Task<int> OnExecuteAsync(CommandLineApplication app)
@@ -100,16 +99,21 @@ namespace Quacklibs.AzureDevopsCli.Commands.WorkItems
                                 Value = iterationPath
                             });
             }
-            
-            //todo: state
-           
+
             // Create the task
-            var createdWorkItem = await witClient.CreateWorkItemAsync(patchDocument, 
-                                                                      _options.Project, 
-                                                                      type:WorkItemType.ToString());
+            var createdWorkItem = await witClient.CreateWorkItemAsync(patchDocument, _options.Project, type:WorkItemType.ToString());
+
+            if (createdWorkItem == null)
+            {
+                Console.WriteLine("Failed to create workitem");
+                return ExitCodes.Ok;
+            }
+
+            var uri = _options.ToWorkItemUrl(createdWorkItem.Id.Value, _options.Project);
             
             AnsiConsole.WriteLine($"\n created {createdWorkItem.Id}. Type: {this.WorkItemType.ToString()}");
-
+            AnsiConsole.Write(uri, new Style(foreground: Color.Blue));
+      
             return ExitCodes.Ok;
         }
     }

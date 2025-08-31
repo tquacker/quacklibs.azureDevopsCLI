@@ -20,23 +20,25 @@ namespace Quacklibs.AzureDevopsCli
     [HelpOption]
     internal class Program
     {
+        public static IServiceProvider ServiceLocator { get; private set; }
        public static int Main(string[] args)
         {
-            WriteWelcomeMessage();
-
             var services = new ServiceCollection()
              .AddSingleton<IConsole>(PhysicalConsole.Singleton)
-             .AddSingleton<AppOptionsService>()
+             .AddSingleton<SettingsService>()
              .AddScoped<AzureDevopsService>()
              .AddScoped<ICredentialStorage, CredentialStorage>()
              .AddScoped<ConfigureReadCommand>()
            .BuildServiceProvider();
 
+            ServiceLocator = services;
+            
             var app = new CommandLineApplication<Program>();
             app.Conventions
                 .UseDefaultConventions()
                 .UseConstructorInjection(services);
-        
+
+            
             return app.Execute(args);
         }
 
@@ -46,16 +48,6 @@ namespace Quacklibs.AzureDevopsCli
             console.WriteLine();
             app.ShowHelp();
             return 1;
-        }
-
-        private static void WriteWelcomeMessage()
-        {
-            var versionString = Assembly.GetEntryAssembly()?
-                               .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
-                               .InformationalVersion
-                               .ToString();
-            
-            Console.WriteLine($"Starting auzure devops cli, v{versionString}");
         }
     }
 }

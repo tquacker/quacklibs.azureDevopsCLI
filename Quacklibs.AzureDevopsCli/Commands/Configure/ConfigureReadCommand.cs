@@ -7,13 +7,13 @@ namespace Quacklibs.AzureDevopsCli.Commands.Configure
     [Command("read", "r", Description = "read configuration values")]
     internal class ConfigureReadCommand : BaseCommand
     {
-        [Option("--projects")] 
+        [Option("--projects")]
         public bool ShowProjects { get; set; }
 
-        private readonly AppOptionsService _settings;
+        private readonly SettingsService _settings;
         private readonly AzureDevopsService _azureDevops;
 
-        public ConfigureReadCommand(AppOptionsService settings, AzureDevopsService azDevopsService)
+        public ConfigureReadCommand(SettingsService settings, AzureDevopsService azDevopsService)
         {
             _settings = settings;
             _azureDevops = azDevopsService;
@@ -25,18 +25,28 @@ namespace Quacklibs.AzureDevopsCli.Commands.Configure
                 await ShowAvailableProjects();
             else
             {
-                var result = _settings.GetCurrentConfig();
+                try
+                {
+                    foreach (var environmentConfig in base.Settings.EnvironmentConfigurations)
+                    {
+                        var configOptions = _settings.GetConfig(environmentConfig.Value);
+                        var title = $"Configuration - [{environmentConfig.Key}]".EscapeMarkup();
+                        var table = TableBuilder<AppOptionKeyValue>
+                                    .Create()
+                                    .WithTitle(title)
+                                    .WithColumn(name: "Name", valueSelector: new(e => e.Name))
+                                    .WithColumn(name: "Value", valueSelector: new(e => e.Value?.ToString()))
+                                    .WithRows(configOptions)
+                                    .WithOptions(e => e.LeftAligned())
+                                    .Build();
 
-                var table = TableBuilder<AppOptionKeyValue>
-                            .Create()
-                            .WithTitle("Configuration")
-                            .WithColumn(name: "Name", valueSelector: new(e => e.Name, TableColor.Skyblue))
-                            .WithColumn(name: "Value", valueSelector: new(e => e.Value?.ToString()))
-                            .WithRows(result)
-                            .WithOptions(e => e.LeftAligned())
-                            .Build();
-
-                AnsiConsole.Write(table);
+                        AnsiConsole.Write(table);
+                    }
+                }
+                catch (Exception exception)
+                {
+                    return ExitCodes.Error;
+                }
             }
 
             return ExitCodes.Ok;
@@ -55,7 +65,7 @@ namespace Quacklibs.AzureDevopsCli.Commands.Configure
                                 .WithColumn("name", new(e => e.Name))
                                 .WithRows(projects.ToList() ?? [])
                                 .Build();
-            
+
             AnsiConsole.Write(projectsTable);
         }
     }

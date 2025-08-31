@@ -2,6 +2,24 @@ namespace Quacklibs.AzureDevopsCli.Core.Types
 {
     public class WiqlQuery
     {
+        private readonly string _rawQuery;
+
+        public WiqlQuery(string rawQuery)
+        {
+            _rawQuery = rawQuery;
+        }
+
+        private void Clean()
+        {
+            var cleanedQuery = string.Join(
+                Environment.NewLine,
+                _rawQuery
+                    .Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries)
+                    .Select(line => line.Trim())
+                    .Where(line => !string.IsNullOrWhiteSpace(line)));
+        }
+
+
     }
 
     public class WiqlQueryPart

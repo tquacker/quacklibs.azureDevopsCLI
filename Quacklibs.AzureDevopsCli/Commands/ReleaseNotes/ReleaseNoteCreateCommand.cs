@@ -10,18 +10,16 @@ namespace Quacklibs.AzureDevopsCli.Commands.ReleaseNotes;
 [Command("create", "c")]
 internal class ReleaseNoteCreateCommand : BaseCommand
 {
-    private readonly DefaultParameters _opts;
     private readonly AzureDevopsService _service;
 
     [Option("-p|--project|--for")]
     public string Project { get; set; }
 
-    public ReleaseNoteCreateCommand(AppOptionsService opts, AzureDevopsService service)
+    public ReleaseNoteCreateCommand(SettingsService opts, AzureDevopsService service)
     {
-        _opts = opts.Defaults;
         _service = service;
 
-        Project = _opts.Project;
+        Project = base.EnvironmentSettings.Project;
     }
 
     public override async Task<int> OnExecuteAsync(CommandLineApplication app)

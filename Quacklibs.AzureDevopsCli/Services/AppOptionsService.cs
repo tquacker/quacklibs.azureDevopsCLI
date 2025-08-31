@@ -1,20 +1,20 @@
-﻿using System.Linq.Expressions;
+﻿using System.Collections;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Quacklibs.AzureDevopsCli.Services
 {
-    internal record AppOptionKeyValue(string Name, object? Value);
+    public record AppOptionKeyValue(string Name, object? Value);
 
-    internal class AppOptionsService
+    public class SettingsService
     {
-        public DefaultParameters Defaults;
+        public Settings Settings;
 
         private static object _FileLock = new();
 
         private readonly JsonSerializerOptions _options = new() { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull, WriteIndented = true, };
 
-        public AppOptionsService()
+        public SettingsService()
         {
             Load();
         }
@@ -25,10 +25,19 @@ namespace Quacklibs.AzureDevopsCli.Services
             return Path.Join(homeUserProfile, ".devops", "config.json");
         }
 
-        public List<AppOptionKeyValue> GetCurrentConfig()
+        public List<AppOptionKeyValue> GetConfig(EnvironmentConfiguration configuration)
         {
-            var props = typeof(DefaultParameters).GetProperties();
-            return props.Select(prop => new AppOptionKeyValue(prop.Name, prop.GetValue(Defaults))).ToList();
+            var props = configuration.GetType().GetProperties();
+            var result = new List<AppOptionKeyValue>();
+
+            foreach (var prop in props)
+            {
+                var value = prop.GetValue(configuration);
+                                                   
+                result.Add(new AppOptionKeyValue(prop.Name, value?.ToString()));
+            }
+
+            return result;
         }
 
 
@@ -40,18 +49,24 @@ namespace Quacklibs.AzureDevopsCli.Services
                 {
                     string configurationFile = this.GetConfigurationFilePath();
 
-                    CreateConfigFileIfNotExists(configurationFile);
+                    CreateDefaultConfigFileIfNotExists(configurationFile);
 
-                    var configFileContents = File.ReadAllText(configurationFile);
-
-                    if (!string.IsNullOrEmpty(configFileContents))
+                    try
                     {
-                        Defaults = JsonSerializer.Deserialize<DefaultParameters>(configFileContents);
+                        var configFileContents = File.ReadAllText(configurationFile);
+                        var settings = JsonSerializer.Deserialize<Settings>(configFileContents, _options);
+                        Settings = settings;
                     }
-                    else
+                    catch (JsonException ex)
                     {
-                        Defaults = new DefaultParameters();
-                        Console.WriteLine("No configuration file found use --config -p [projectname]  -o [organizationName]");
+                        Console.WriteLine(ex);
+                        Console.WriteLine("Invalid config file. It will be deleted. Please try again");
+                        Delete();
+                    }
+                    finally
+                    {
+                        if (Settings == null)
+                            Settings = new Settings();
                     }
                 }
             }
@@ -61,9 +76,10 @@ namespace Quacklibs.AzureDevopsCli.Services
             }
         }
 
-        private static void CreateConfigFileIfNotExists(string configurationFile)
+        private static void CreateDefaultConfigFileIfNotExists(string configurationFile)
         {
-            string configurationDirectory = Path.GetDirectoryName(configurationFile);
+            string? configurationDirectory = Path.GetDirectoryName(configurationFile);
+
             if (!Directory.Exists(configurationDirectory))
             {
                 Directory.CreateDirectory(configurationDirectory);
@@ -71,16 +87,34 @@ namespace Quacklibs.AzureDevopsCli.Services
 
             if (!File.Exists(configurationFile))
             {
-                File.WriteAllText(configurationFile, "{}");
+                var defaultJson = JsonSerializer.Serialize(new Settings());
+                File.WriteAllText(configurationFile, defaultJson);
             }
+        }
+
+        internal void Delete(string environment)
+        {
+            if (!string.IsNullOrEmpty(environment))                                   
+            {                                                                         
+                Settings.EnvironmentConfigurations.Remove(environment);               
+                Save(Settings);                                                       
+                return;                                                               
+            }                                                                         
         }
 
         internal void Delete()
         {
+
+
+
+
+
+
+
             lock (_FileLock)
             {
                 if (File.Exists(this.GetConfigurationFilePath()))
-                {
+                {     
                     File.Delete(this.GetConfigurationFilePath());
                     Console.WriteLine("Configuration deleted");
                 }
@@ -91,14 +125,14 @@ namespace Quacklibs.AzureDevopsCli.Services
             }
         }
 
-        internal void Save()
+        internal void Save(Settings updatetSettings)
         {
             string configurationFile = this.GetConfigurationFilePath();
-            CreateConfigFileIfNotExists(configurationFile);
+            CreateDefaultConfigFileIfNotExists(configurationFile);
 
-            var output = JsonSerializer.Serialize(Defaults, _options);
+            var output = JsonSerializer.Serialize(updatetSettings, _options);
 
             File.WriteAllText(configurationFile, output);
         }
-  }
+    }
 }

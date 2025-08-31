@@ -14,7 +14,7 @@ namespace Quacklibs.AzureDevopsCli.Commands.SprintPlanning
     [Command(name: "update", Description = "Move all active items from active iteration to the new iteration")]
     internal class SprintPlanningUpdateCommand : BaseCommand
     {
-        private readonly AppOptionsService options;
+        private readonly SettingsService options;
 
         public AzureDevopsService _service { get; }
 
@@ -25,12 +25,12 @@ namespace Quacklibs.AzureDevopsCli.Commands.SprintPlanning
         [Option("--for")]
         string AssignedTo { get; set; } = "@all";
 
-        public SprintPlanningUpdateCommand(AzureDevopsService service, AppOptionsService options)
+        public SprintPlanningUpdateCommand(AzureDevopsService service, SettingsService options)
         {
             _service = service;
             this.options = options;
 
-            Project = options.Defaults.Project;
+            Project = base.EnvironmentSettings.Project;
         }
 
         public override async Task<int> OnExecuteAsync(CommandLineApplication app)
@@ -73,7 +73,7 @@ namespace Quacklibs.AzureDevopsCli.Commands.SprintPlanning
             var fromIteration = AnsiConsole.Prompt(fromPrompt);
             var toIteration = AnsiConsole.Prompt(toPrompt);
 
-            var assignedToWiql = new AssignedUserWiqlQueryPart(options.Defaults.UserEmail).Get(this.AssignedTo);
+            var assignedToWiql = new AssignedUserWiqlQueryPart(base.EnvironmentSettings.UserEmail).Get(this.AssignedTo);
 
             var wiql = new Wiql()
             {

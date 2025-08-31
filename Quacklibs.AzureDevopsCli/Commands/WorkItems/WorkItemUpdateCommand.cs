@@ -17,7 +17,7 @@ namespace Quacklibs.AzureDevopsCli.Commands.WorkItems;
 /// Update iteration to: Current iteration | backlog
 /// 
 /// </summary>
-[Command("read", "r", Description = "Update a work items from a team or project")]
+[Command("update", "u", Description = "Update a work items from a team or project")]
 internal class WorkItemUpdateCommand : BaseCommand
 {
     [Option("-a|--assignedTo|--for")]
@@ -36,15 +36,15 @@ internal class WorkItemUpdateCommand : BaseCommand
     [Option("-m|-c|--comment|", Description = "Comment to add to the eworkitem")]
     public string Project { get; set; }
 
-    private readonly AppOptionsService _appOptions;
+    private readonly SettingsService _settings;
     private readonly AzureDevopsService _azureDevops;
 
-    public WorkItemUpdateCommand(AppOptionsService appOptions, AzureDevopsService azureDevops)
+    public WorkItemUpdateCommand(SettingsService settings, AzureDevopsService azureDevops)
     {
-        _appOptions = appOptions;
+        _settings = settings;
         _azureDevops = azureDevops;
 
-        Project = _appOptions.Defaults.Project;
+        Project = base.EnvironmentSettings.Project;
     }
 
     public override async Task<int> OnExecuteAsync(CommandLineApplication app)

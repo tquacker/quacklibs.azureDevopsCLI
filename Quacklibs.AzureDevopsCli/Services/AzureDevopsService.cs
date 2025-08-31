@@ -4,25 +4,25 @@ using Quacklibs.AzureDevopsCli.Services;
 
 namespace Quacklibs.AzureDevopsCli
 {
-    internal class AzureDevopsService
+    public class AzureDevopsService
     {
-        private readonly AppOptionsService _appOptionsService;
+        private readonly SettingsService _settingsService;
         private Lazy<VssConnection> _connection 
-            => new(() => CreatePATConnection(_appOptionsService.Defaults.OrganizationUrl, _appOptionsService.Defaults.PAT));
+            => new(() => CreatePATConnection(_settingsService.Settings.CurrentEnv().OrganizationUrl, _settingsService.Settings.CurrentEnv().PAT));
 
 
-        public AzureDevopsService(AppOptionsService appOptionsService)
+        public AzureDevopsService(SettingsService settingsService)
         {
-            _appOptionsService = appOptionsService;
+            _settingsService = settingsService;
         }
 
         
         public T GetClient<T>() where T : IVssHttpClient
         {
-            if(string.IsNullOrEmpty(_appOptionsService.Defaults.OrganizationUrl))
-                AnsiConsole.Write($"Unable to create a connection, no {nameof(DefaultParameters.OrganizationUrl)} defined");
-            if(string.IsNullOrEmpty(_appOptionsService.Defaults.PAT))
-                AnsiConsole.Write($"Unable to Authorize to azure devops, no {nameof(DefaultParameters.PAT)} defined");
+            if(string.IsNullOrEmpty(_settingsService.Settings.CurrentEnv().OrganizationUrl))
+                AnsiConsole.Write($"Unable to create a connection, no {nameof(EnvironmentConfiguration.OrganizationUrl)} defined");
+            if(string.IsNullOrEmpty(_settingsService.Settings.CurrentEnv().PAT))
+                AnsiConsole.Write($"Unable to Authorize to azure devops, no {nameof(EnvironmentConfiguration.PAT)} defined");
             
             return _connection.Value.GetClient<T>();
         }
