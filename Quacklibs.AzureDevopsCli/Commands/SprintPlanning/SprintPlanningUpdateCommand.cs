@@ -14,8 +14,6 @@ namespace Quacklibs.AzureDevopsCli.Commands.SprintPlanning
     [Command(name: "update", Description = "Move all active items from active iteration to the new iteration")]
     internal class SprintPlanningUpdateCommand : BaseCommand
     {
-        private readonly SettingsService options;
-
         public AzureDevopsService _service { get; }
 
         [Option("--team|--project")]
@@ -28,9 +26,8 @@ namespace Quacklibs.AzureDevopsCli.Commands.SprintPlanning
         public SprintPlanningUpdateCommand(AzureDevopsService service, SettingsService options)
         {
             _service = service;
-            this.options = options;
-
-            Project = base.EnvironmentSettings.Project;
+ 
+            Project = base.EnvironmentSettings.DefaultProject;
         }
 
         public override async Task<int> OnExecuteAsync(CommandLineApplication app)

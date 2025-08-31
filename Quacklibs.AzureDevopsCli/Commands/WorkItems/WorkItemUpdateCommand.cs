@@ -44,7 +44,7 @@ internal class WorkItemUpdateCommand : BaseCommand
         _settings = settings;
         _azureDevops = azureDevops;
 
-        Project = base.EnvironmentSettings.Project;
+        Project = base.EnvironmentSettings.DefaultProject;
     }
 
     public override async Task<int> OnExecuteAsync(CommandLineApplication app)

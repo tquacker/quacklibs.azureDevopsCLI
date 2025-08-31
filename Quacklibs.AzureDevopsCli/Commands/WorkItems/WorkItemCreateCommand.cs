@@ -101,7 +101,7 @@ namespace Quacklibs.AzureDevopsCli.Commands.WorkItems
             }
 
             // Create the task
-            var createdWorkItem = await witClient.CreateWorkItemAsync(patchDocument, _options.Project, type:WorkItemType.ToString());
+            var createdWorkItem = await witClient.CreateWorkItemAsync(patchDocument, _options.DefaultProject, type:WorkItemType.ToString());
 
             if (createdWorkItem == null)
             {
@@ -109,7 +109,7 @@ namespace Quacklibs.AzureDevopsCli.Commands.WorkItems
                 return ExitCodes.Ok;
             }
 
-            var uri = _options.ToWorkItemUrl(createdWorkItem.Id.Value, _options.Project);
+            var uri = _options.ToWorkItemUrl(createdWorkItem.Id.Value, _options.DefaultProject);
             
             AnsiConsole.WriteLine($"\n created {createdWorkItem.Id}. Type: {this.WorkItemType.ToString()}");
             AnsiConsole.Write(uri, new Style(foreground: Color.Blue));

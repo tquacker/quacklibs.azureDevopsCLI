@@ -24,13 +24,13 @@ namespace Quacklibs.AzureDevopsCli.Commands.WorkItems
         {
             _service = service;
 
-            Project = base.EnvironmentSettings.Project;
+            Project = base.EnvironmentSettings.DefaultProject;
         }
 
         public override async Task<int> OnExecuteAsync(CommandLineApplication app)
         {
            
-            if (Project ==  base.EnvironmentSettings.Project)
+            if (Project ==  base.EnvironmentSettings.DefaultProject)
             {
                 var uri = $"{base.EnvironmentSettings.OrganizationUrl}/{Project.Encode()}/_workitems/edit/{Id}";
                 

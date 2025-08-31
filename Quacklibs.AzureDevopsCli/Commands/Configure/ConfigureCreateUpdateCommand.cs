@@ -1,6 +1,5 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
-using Quacklibs.AzureDevopsCli.Commands.PullRequests;
-using Quacklibs.AzureDevopsCli.Services;
+using Quacklibs.AzureDevopsCli.Commands.Login;
 
 
 namespace Quacklibs.AzureDevopsCli.Commands.Configure
@@ -8,7 +7,7 @@ namespace Quacklibs.AzureDevopsCli.Commands.Configure
     [Command("create", "update", Description = "Create or update an configuration option")]
     internal class ConfigureCreateUpdateCommand : BaseCommand
     {
-        [Option("-o|--organization|--organizationurl", Description = "Set the azure devops organization url. Will usually be in the format 'https://dev.azure.com/[yourOrganization]")]
+        [Option("-o|--organization|--organizationurl", Description = "Set the azure devops organization url. Will be in the format 'https://dev.azure.com/[yourOrganization] when hosted in the cloud | ")]
         public string? OrganizationUrl { get; set; }
 
         [Option("-p|--project|--team", Description = "Set the default azure devops project or team")]
@@ -23,29 +22,33 @@ namespace Quacklibs.AzureDevopsCli.Commands.Configure
         [Option("--env|--environment", Description= "create a new environment")]
         public string Environment { get; set; }
 
-        private readonly ICredentialStorage _credentialStore;
+
         private readonly ConfigureReadCommand _readCommand;
 
-        public ConfigureCreateUpdateCommand(ICredentialStorage credentialStore, ConfigureReadCommand readCommand)
+        public ConfigureCreateUpdateCommand(ConfigureReadCommand readCommand)
         {
-            _credentialStore = credentialStore;
             _readCommand = readCommand;
         }
 
         public override async Task<int> OnExecuteAsync(CommandLineApplication app)
         {
-            base.OnExecuteAsync(app);
+            await base.OnExecuteAsync(app);
+
+            if (!base.Settings.IsAuthenticated)
+            {
+                Console.WriteLine($"No pat configured. Set that with {LoginCommand.ConfigurePatHelpText} ");
+            }
 
             if (!string.IsNullOrEmpty(Environment))
             {
-                if (base.Settings.TryAddEnvironment(Environment) == false)
-                    return ExitCodes.Error;
+                base.Settings.TryAddEnvironment(Environment);
             }
+
             
             //TODO: this should be a choice from the available projects | a walkthrough
             if (!string.IsNullOrEmpty(Project))
             {
-                EnvironmentSettings.Project = Project;
+                EnvironmentSettings.DefaultProject = Project;
             }
             if (!string.IsNullOrEmpty(OrganizationUrl))
             {
@@ -56,20 +59,14 @@ namespace Quacklibs.AzureDevopsCli.Commands.Configure
             {
                 EnvironmentSettings.UserEmail = UserEmail;
             }
-            if (!string.IsNullOrEmpty(Pat))
-            {
-                EnvironmentSettings.PAT = Pat;
-                //TODO
-                // _credentialStore.set(new PersonalAccessToken(Pat));
-                // Console.WriteLine("Personal access token saved to secure storage");
-            }
-            
+                
             // var profile = await profileClient.GetProfileAsync(new ProfileQueryContext(AttributesScope.Core, CoreProfileAttributes.All));
             //
             base.SettingsService.Save(base.Settings);
 
             Console.WriteLine("Current settings:");
-            _readCommand.OnExecuteAsync(app);
+
+            await _readCommand.OnExecuteAsync(app);
 
             return ExitCodes.Ok;
         }

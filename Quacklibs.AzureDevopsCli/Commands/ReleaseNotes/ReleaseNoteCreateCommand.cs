@@ -19,7 +19,7 @@ internal class ReleaseNoteCreateCommand : BaseCommand
     {
         _service = service;
 
-        Project = base.EnvironmentSettings.Project;
+        Project = base.EnvironmentSettings.DefaultProject;
     }
 
     public override async Task<int> OnExecuteAsync(CommandLineApplication app)

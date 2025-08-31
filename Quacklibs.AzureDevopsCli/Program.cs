@@ -1,6 +1,7 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
 using Microsoft.Extensions.DependencyInjection;
 using Quacklibs.AzureDevopsCli.Commands.Configure;
+using Quacklibs.AzureDevopsCli.Commands.Login;
 using Quacklibs.AzureDevopsCli.Commands.PullRequests;
 using Quacklibs.AzureDevopsCli.Commands.ReleaseNotes;
 using Quacklibs.AzureDevopsCli.Commands.SprintPlanning;
@@ -12,6 +13,7 @@ using System.Reflection;
 namespace Quacklibs.AzureDevopsCli
 {
     [Command(Name = "azdev", Description = "an toolbox with options to make working with azure devops easier, quicker and better. ")]
+    [Subcommand(typeof(LoginCommand))]
     [Subcommand(typeof(ConfigureCommand))]
     [Subcommand(typeof(WorkItemCommand))]
     [Subcommand(typeof(ReleaseNoteCommand))]

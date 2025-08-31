@@ -21,7 +21,7 @@ namespace Quacklibs.AzureDevopsCli.Core.Types
             {
                 Console.WriteLine("Environment already exists");
                 SelectedEnvironment = newEnvName;
-                return false;
+                return true;
             }
             else
             {
@@ -31,13 +31,15 @@ namespace Quacklibs.AzureDevopsCli.Core.Types
                 return true;
             }
         }
+
+        public bool IsAuthenticated => !string.IsNullOrEmpty(CurrentEnv().PAT);
     }
     
     public class EnvironmentConfiguration
     {
         public string OrganizationUrl { get; set; }
 
-        public string Project { get; set; } = "MVT - ValidatieTeruggaafBTW - Douane";
+        public string DefaultProject { get; set; }
 
         public string PAT { get; set; }
 
@@ -45,7 +47,7 @@ namespace Quacklibs.AzureDevopsCli.Core.Types
 
         public string ToWorkItemUrl(int id, string project = "")
         {
-            var workItemProject = string.IsNullOrEmpty(project) ? Project : project;
+            var workItemProject = string.IsNullOrEmpty(project) ? DefaultProject : project;
             return $"{OrganizationUrl}/{workItemProject.Encode()}/_workitems/edit/{id}";
         }
     }

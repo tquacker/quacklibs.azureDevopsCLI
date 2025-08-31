@@ -42,6 +42,7 @@ namespace Quacklibs.AzureDevopsCli.Services
 
 
         void Load()
+        
         {
             try
             {

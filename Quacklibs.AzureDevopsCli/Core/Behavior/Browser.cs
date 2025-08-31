@@ -5,10 +5,10 @@ namespace Quacklibs.AzureDevopsCli.Core.Behavior
     public static class Browser
     {
         public static void Open(string url)
-        {
+        {            
             try
             {
- if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
                     Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
                 }
